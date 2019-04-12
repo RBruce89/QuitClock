@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">QuitClock</string>
+
+    <string-array name="locations">
+        <item>Home</item>
+        <item>Work</item>
+        <item>Bar</item>
+        <item>Vacation</item>
+    </string-array>
+</resources>

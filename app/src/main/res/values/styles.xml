@@ -1,0 +1,42 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="android:spinnerItemStyle">@style/spinnerItemStyle</item>
+        <item name="android:spinnerDropDownItemStyle">@style/spinnerDropDownItemStyle</item>
+        <item name="android:dropDownListViewStyle">@style/spinnerDropDownList</item>
+    </style>
+
+    <style name="spinnerItemStyle">
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">32sp</item>
+    </style>
+
+    <style name="spinnerDropDownItemStyle">
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="spinnerDropDownList">
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:divider">#d1d1d1</item>
+        <item name="android:dividerHeight">0.5dp</item>
+    </style>
+
+    <style name="numberPickerStyle" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textSize">32sp</item>
+    </style>
+</resources>

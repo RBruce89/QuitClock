@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".MainActivity">
+    <Button
+        android:id="@+id/btn_info"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="i"
+        app:layout_constraintRight_toRightOf="parent"/>
+    <TextView
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0:00:00"
+        android:textSize="88sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_light_up"/>
+
+    <Button
+        android:id="@+id/btn_light_up"
+        android:layout_width="276dp"
+        android:layout_height="78dp"
+        android:layout_marginBottom="34dp"
+        android:text="Light Up"
+        android:textSize="30sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/divider"/>
+
+    <TextView
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toTopOf="@+id/nbp_hour"/>
+
+    <Button
+        android:id="@+id/btn_lock_number_picker"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_margin="16dp"
+        android:text="L"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/nbp_hour"
+        app:layout_constraintBottom_toBottomOf="@+id/nbp_hour"/>
+
+    <NumberPicker
+        android:theme="@style/numberPickerStyle"
+        android:id="@+id/nbp_hour"
+        android:layout_width="40dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintLeft_toRightOf="@+id/btn_lock_number_picker"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=":"
+        android:textSize="36sp"
+        app:layout_constraintLeft_toRightOf="@+id/nbp_hour"
+        app:layout_constraintRight_toLeftOf="@id/nbp_minute"
+        app:layout_constraintTop_toTopOf="@+id/nbp_hour"
+        app:layout_constraintBottom_toBottomOf="@+id/nbp_hour"/>
+
+    <NumberPicker
+        android:theme="@style/numberPickerStyle"
+        android:id="@+id/nbp_minute"
+        android:layout_width="40dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintLeft_toRightOf="@+id/nbp_hour"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <Spinner
+        android:id="@+id/spn_locations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintLeft_toRightOf="@id/nbp_minute"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/nbp_minute"
+        app:layout_constraintBottom_toBottomOf="@+id/nbp_minute"/>
+
+</android.support.constraint.ConstraintLayout>
