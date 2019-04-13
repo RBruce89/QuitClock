@@ -46,7 +46,7 @@
         app:layout_constraintBottom_toTopOf="@+id/nbp_hour"/>
 
     <Button
-        android:id="@+id/btn_lock_number_picker"
+        android:id="@+id/btn_lock_number_pickers"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_margin="16dp"
@@ -64,7 +64,7 @@
         android:layout_marginBottom="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        app:layout_constraintLeft_toRightOf="@+id/btn_lock_number_picker"
+        app:layout_constraintLeft_toRightOf="@+id/btn_lock_number_pickers"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <TextView
