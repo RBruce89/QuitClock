@@ -1,5 +1,6 @@
 package com.example.caden.quitclock;
 
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -20,13 +21,17 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity {
 
     private long startTime;
+    private SharedPreferences startTimePref;
 
     private ArrayList<String> locationList = new ArrayList<>();
     private String selectedLocation;
 
-    private Boolean pickersEnabled = false;
+    private Boolean pickersEnabled = true;
+
+    long timerSeconds = 0;
 
     private Boolean runThread = true;
+    private Boolean firstLoad = true;
 
     private Handler countdownHandler = new Handler() {
         @Override
@@ -49,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
         final Button lockButton = findViewById(R.id.btn_lock_number_pickers);
         final Button statisticsButton = findViewById(R.id.btn_info);
 
+        startTimePref = getSharedPreferences("startTime", MODE_PRIVATE);
+        startTime = startTimePref.getLong("startTime", 0);
+
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.locations, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -70,24 +78,36 @@ public class MainActivity extends AppCompatActivity {
 
         lightUpButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                startTime = System.nanoTime();
-                new Thread(countdownRunnable).start();
+                if (!pickersEnabled) {
+                    startTime = System.nanoTime();
+                    SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
+                    startTimePrefsEditor.putLong("startTime", startTime);
+                    startTimePrefsEditor.apply();
+
+                    if (firstLoad) {
+                        new Thread(countdownRunnable).start();
+                    }
+                }
             }
         });
 
         lockButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
+                Button lockButton  = findViewById(R.id.btn_lock_number_pickers);
                 NumberPicker hourPicker = findViewById(R.id.nbp_hour);
                 NumberPicker minutePicker = findViewById(R.id.nbp_minute);
                 if (pickersEnabled) {
                     pickersEnabled = false;
                     hourPicker.setEnabled(false);
                     minutePicker.setEnabled(false);
+                    lockButton.setText("L");
+                    timerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
                     //change icon
                 } else {
                     pickersEnabled = true;
                     hourPicker.setEnabled(true);
                     minutePicker.setEnabled(true);
+                    lockButton.setText("U");
                     //change icon
                 }
             }
@@ -114,6 +134,11 @@ public class MainActivity extends AppCompatActivity {
                 return String.format(Locale.US, "%02d", i);
             }
         });
+
+        if (!pickersEnabled) {
+            hourPicker.setEnabled(false);
+            minutePicker.setEnabled(false);
+        }
     }
 
     private Runnable countdownRunnable = new Runnable() {
@@ -132,9 +157,6 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public String getTimeDisplayValue(){
-        final NumberPicker selectedHours = findViewById(R.id.nbp_hour);
-        final NumberPicker selectedMinutes = findViewById(R.id.nbp_minute);
-        long timerSeconds = (selectedHours.getValue() * 3600) + (selectedMinutes.getValue() * 60);
 
         long elapsedSeconds = (System.nanoTime() - startTime) / 1000000000;
 
@@ -158,5 +180,19 @@ public class MainActivity extends AppCompatActivity {
 
         return (String.valueOf(String.format(
                 Locale.US, "%01d:%02d:%02d", hour, minute, second)));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!pickersEnabled) {
+            new Thread(countdownRunnable).start();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        runThread = false;
     }
 }

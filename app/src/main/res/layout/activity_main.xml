@@ -50,7 +50,7 @@
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_margin="16dp"
-        android:text="L"
+        android:text="U"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="@+id/nbp_hour"
         app:layout_constraintBottom_toBottomOf="@+id/nbp_hour"/>
