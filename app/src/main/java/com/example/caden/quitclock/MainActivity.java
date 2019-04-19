@@ -167,49 +167,69 @@ public class MainActivity extends AppCompatActivity {
         lightUpButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 if (!pickersEnabled) {
+                    long elapsedSeconds = (System.nanoTime() - startTime) / 1000000000;
                     if (startTime == 0) {
                         runThread = true;
                         new Thread(countdownRunnable).start();
+                    } else if (timerSeconds > elapsedSeconds) {
+                        AlertDialog.Builder warningBuilder = new AlertDialog.Builder(MainActivity.this);
+                        warningBuilder.setTitle(
+                                "Your time isn't up yet. Are you sure you want to light up?");
+                        warningBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startTime = System.nanoTime();
+                                SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
+                                startTimePrefsEditor.putLong("startTime", startTime);
+                                startTimePrefsEditor.apply();
+                            }
+                        });
+                        warningBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        warningBuilder.show();
+                    } else {
+                        startTime = System.nanoTime();
+                        SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
+                        startTimePrefsEditor.putLong("startTime", startTime);
+                        startTimePrefsEditor.apply();
                     }
-
-                    startTime = System.nanoTime();
-                    SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
-                    startTimePrefsEditor.putLong("startTime", startTime);
-                    startTimePrefsEditor.apply();
                 }
             }
         });
 
         lockButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                Button lockButton  = findViewById(R.id.btn_lock_number_pickers);
-                NumberPicker hourPicker = findViewById(R.id.nbp_hour);
-                NumberPicker minutePicker = findViewById(R.id.nbp_minute);
+                final Button lockButton  = findViewById(R.id.btn_lock_number_pickers);
+                final NumberPicker hourPicker = findViewById(R.id.nbp_hour);
+                final NumberPicker minutePicker = findViewById(R.id.nbp_minute);
                 if (pickersEnabled) {
-                    pickersEnabled = false;
-                    hourPicker.setEnabled(false);
-                    minutePicker.setEnabled(false);
-                    lockButton.setText("L");
-                    timerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
-                    //change icon
-
-
-                    JSONObject timerJSONObject = new JSONObject();
-                    try {
-                        timerJSONObject.put("hours", hourPicker.getValue());
-                        timerJSONObject.put("minutes", minutePicker.getValue());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    long newTimerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
+                    if (newTimerSeconds < timerSeconds) {
+                        AlertDialog.Builder warningBuilder = new AlertDialog.Builder(MainActivity.this);
+                        warningBuilder.setTitle(
+                                "Are you sure you want to reduce the timer for this location?");
+                        warningBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                setLocationTime();
+                            }
+                        });
+                        warningBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        warningBuilder.show();
+                    } else {
+                        setLocationTime();
                     }
-
-                    SharedPreferences.Editor locationSettingsPrefsEditor = locationSettingPrefs.edit();
-                    Gson locationSettingsGson = new Gson();
-                    String timerJson = locationSettingsGson.toJson(timerJSONObject);
-                    locationSettingsPrefsEditor.putString(selectedLocation, timerJson);
-                    locationSettingsPrefsEditor.commit();
-
-
                 } else {
+                    timerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
                     pickersEnabled = true;
                     hourPicker.setEnabled(true);
                     minutePicker.setEnabled(true);
@@ -224,6 +244,33 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void setLocationTime() {
+        Button lockButton  = findViewById(R.id.btn_lock_number_pickers);
+        NumberPicker hourPicker = findViewById(R.id.nbp_hour);
+        NumberPicker minutePicker = findViewById(R.id.nbp_minute);
+
+        pickersEnabled = false;
+        hourPicker.setEnabled(false);
+        minutePicker.setEnabled(false);
+        lockButton.setText("L");
+        timerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
+        //change icon
+
+        JSONObject timerJSONObject = new JSONObject();
+        try {
+            timerJSONObject.put("hours", hourPicker.getValue());
+            timerJSONObject.put("minutes", minutePicker.getValue());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        SharedPreferences.Editor locationSettingsPrefsEditor = locationSettingPrefs.edit();
+        Gson locationSettingsGson = new Gson();
+        String timerJson = locationSettingsGson.toJson(timerJSONObject);
+        locationSettingsPrefsEditor.putString(selectedLocation, timerJson);
+        locationSettingsPrefsEditor.apply();
     }
 
     public void setUpPickers() {
