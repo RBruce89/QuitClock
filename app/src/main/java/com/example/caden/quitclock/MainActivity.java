@@ -17,12 +17,9 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-
 import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
@@ -160,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
@@ -233,8 +229,7 @@ public class MainActivity extends AppCompatActivity {
                     pickersEnabled = true;
                     hourPicker.setEnabled(true);
                     minutePicker.setEnabled(true);
-                    lockButton.setText("U");
-                    //change icon
+                    lockButton.setBackgroundResource(R.drawable.round_lock_open_black_36);
                 }
             }
         });
@@ -254,9 +249,8 @@ public class MainActivity extends AppCompatActivity {
         pickersEnabled = false;
         hourPicker.setEnabled(false);
         minutePicker.setEnabled(false);
-        lockButton.setText("L");
+        lockButton.setBackgroundResource(R.drawable.round_lock_black_36);
         timerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
-        //change icon
 
         JSONObject timerJSONObject = new JSONObject();
         try {
@@ -317,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
                 minutePicker.setEnabled(false);
                 minutePicker.setValue(minutes);
                 timerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
-                lockButton.setText("L"); //icon change
+                lockButton.setBackgroundResource(R.drawable.round_lock_black_36);
                 pickersEnabled = false;
 
             } catch (JSONException e) {
@@ -328,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
             hourPicker.setValue(0);
             minutePicker.setEnabled(true);
             minutePicker.setValue(0);
-            lockButton.setText("U"); //icon change
+            lockButton.setBackgroundResource(R.drawable.round_lock_open_black_36);
             pickersEnabled = true;
         }
     }
@@ -349,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public String getTimeDisplayValue(){
+         final TextView timerDisplay = findViewById(R.id.timer);
 
         long elapsedSeconds = (System.nanoTime() - startTime) / 1000000000;
 
@@ -357,13 +352,13 @@ public class MainActivity extends AppCompatActivity {
         long second;
 
         if (timerSeconds > elapsedSeconds){
-            //turn view red
+            timerDisplay.setTextColor(getResources().getColor(R.color.colorRed));
             long remainingSeconds = timerSeconds - elapsedSeconds;
             hour = TimeUnit.SECONDS.toHours(remainingSeconds);
             minute = TimeUnit.SECONDS.toMinutes(remainingSeconds) % 60;
             second = remainingSeconds % 60;
         } else {
-            //turn view green
+            timerDisplay.setTextColor(getResources().getColor(R.color.colorGreen));
             long extraSeconds = elapsedSeconds - timerSeconds;
             hour = TimeUnit.SECONDS.toHours(extraSeconds);
             minute = TimeUnit.SECONDS.toMinutes(extraSeconds) % 60;
