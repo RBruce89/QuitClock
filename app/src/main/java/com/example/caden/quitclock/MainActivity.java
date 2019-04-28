@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private Boolean pickersEnabled = true;
 
     long timerSeconds = 0;
+    long tempTimerSeconds = 0;
 
     private boolean runThread;
 
@@ -113,30 +114,32 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             String locationName = locationInput.getText().toString();
                             if (!locationName.equals("")) {
+                                tempTimerSeconds = 0;
+
                                 locationList.remove(0);
                                 locationList.add(locationName);
+
+                                HashSet<String> locationListSet = new HashSet<>(locationList);
+
+                                SharedPreferences.Editor listPrefsEditor = locationListPrefs.edit();
+                                listPrefsEditor.putStringSet("locationList", locationListSet);
+                                listPrefsEditor.apply();
+
+                                locationList.add(0, "Add Location");
+
+                                Spinner locationSpinner = findViewById(R.id.spn_locations);
+                                ArrayAdapter<String> locationsArrayAdapter = new ArrayAdapter<String>(
+                                        MainActivity.this, android.R.layout.simple_spinner_item, locationList);
+                                locationsArrayAdapter.setDropDownViewResource(
+                                        android.R.layout.simple_spinner_dropdown_item);
+                                locationSpinner.setAdapter(locationsArrayAdapter);
+                                locationSpinner.setSelection(locationsArrayAdapter.getPosition(locationName));
+
+                                selectedLocation = locationName;
+                                SharedPreferences.Editor selectedLocationPrefsEditor = selectedLocationPref.edit();
+                                selectedLocationPrefsEditor.putString("selectedProjectName", selectedLocation);
+                                selectedLocationPrefsEditor.apply();
                             }
-
-                            HashSet<String> locationListSet = new HashSet<>(locationList);
-
-                            SharedPreferences.Editor listPrefsEditor = locationListPrefs.edit();
-                            listPrefsEditor.putStringSet("locationList", locationListSet);
-                            listPrefsEditor.apply();
-
-                            locationList.add(0, "Add Location");
-
-                            Spinner locationSpinner = findViewById(R.id.spn_locations);
-                            ArrayAdapter<String> locationsArrayAdapter = new ArrayAdapter<String>(
-                                    MainActivity.this, android.R.layout.simple_spinner_item, locationList);
-                            locationsArrayAdapter.setDropDownViewResource(
-                                    android.R.layout.simple_spinner_dropdown_item);
-                            locationSpinner.setAdapter(locationsArrayAdapter);
-                            locationSpinner.setSelection(locationsArrayAdapter.getPosition(locationName));
-
-                            selectedLocation = locationName;
-                            SharedPreferences.Editor selectedLocationPrefsEditor = selectedLocationPref.edit();
-                            selectedLocationPrefsEditor.putString("selectedProjectName", selectedLocation);
-                            selectedLocationPrefsEditor.apply();
                         }
                     });
                     locationBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -204,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
                 final NumberPicker minutePicker = findViewById(R.id.nbp_minute);
                 if (pickersEnabled) {
                     long newTimerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
-                    if (newTimerSeconds < timerSeconds) {
+                    if (newTimerSeconds < tempTimerSeconds) {
                         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(MainActivity.this);
                         warningBuilder.setTitle(
                                 "Are you sure you want to reduce the timer for this location?");
@@ -225,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                         setLocationTime();
                     }
                 } else {
-                    timerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
+                    tempTimerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
                     pickersEnabled = true;
                     hourPicker.setEnabled(true);
                     minutePicker.setEnabled(true);
