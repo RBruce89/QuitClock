@@ -1,6 +1,7 @@
 package com.example.caden.quitclock;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
@@ -27,6 +28,8 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
+    Statistics statistics = new Statistics(this);
+
     private long startTime;
     private SharedPreferences startTimePref;
 
@@ -49,9 +52,9 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             final TextView timer = findViewById(R.id.timer);
 
-            Bundle timerBundle = msg.getData();
+                Bundle timerBundle = msg.getData();
 
-            timer.setText(timerBundle.getString("Time"));
+                timer.setText(timerBundle.getString("Time"));
         }
     };
 
@@ -166,10 +169,16 @@ public class MainActivity extends AppCompatActivity {
         lightUpButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 if (!pickersEnabled) {
-                    long elapsedSeconds = (System.nanoTime() - startTime) / 1000000000;
+                    long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
                     if (startTime == 0) {
+                        startTime = System.currentTimeMillis();
+                        statistics.addCigaretteSmoked(startTime);
+                        statistics.addLocationTime(selectedLocation, startTime);
                         runThread = true;
                         new Thread(countdownRunnable).start();
+                        SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
+                        startTimePrefsEditor.putLong("startTime", startTime);
+                        startTimePrefsEditor.apply();
                     } else if (timerSeconds > elapsedSeconds) {
                         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(MainActivity.this);
                         warningBuilder.setTitle(
@@ -177,7 +186,11 @@ public class MainActivity extends AppCompatActivity {
                         warningBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                startTime = System.nanoTime();
+                                startTime = System.currentTimeMillis();
+                                statistics.addPrematureSmoke(startTime);
+                                statistics.addCigaretteSmoked(startTime);
+                                statistics.addLocationTime(selectedLocation, startTime);
+                                statistics.addExtraMinutes(0, startTime);
                                 SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
                                 startTimePrefsEditor.putLong("startTime", startTime);
                                 startTimePrefsEditor.apply();
@@ -191,7 +204,12 @@ public class MainActivity extends AppCompatActivity {
                         });
                         warningBuilder.show();
                     } else {
-                        startTime = System.nanoTime();
+                        startTime = System.currentTimeMillis();
+                        statistics.addCigaretteSmoked(startTime);
+                        statistics.addLocationTime(selectedLocation, startTime);
+                        long extraSeconds = elapsedSeconds - timerSeconds;
+                        int extraMinutes = (int) TimeUnit.SECONDS.toMinutes(extraSeconds);
+                        statistics.addExtraMinutes(extraMinutes, startTime);
                         SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
                         startTimePrefsEditor.putLong("startTime", startTime);
                         startTimePrefsEditor.apply();
@@ -215,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 setLocationTime();
+                                statistics.addTimerTurnDown(System.currentTimeMillis());
                             }
                         });
                         warningBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -239,7 +258,8 @@ public class MainActivity extends AppCompatActivity {
 
         statisticsButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-
+                Intent i = new Intent(MainActivity.this, StatisticsActivity.class);
+                startActivity(i);
             }
         });
     }
@@ -336,10 +356,12 @@ public class MainActivity extends AppCompatActivity {
             while (runThread){
                 Message timerMessage = Message.obtain();
                 Bundle timerBundle = new Bundle();
-                timerBundle.putString("Time", getTimeDisplayValue());
-                timerMessage.setData(timerBundle);
+                if (findViewById(R.id.timer) != null) {
+                    timerBundle.putString("Time", getTimeDisplayValue());
+                    timerMessage.setData(timerBundle);
 
-                countdownHandler.sendMessage(timerMessage);
+                    countdownHandler.sendMessage(timerMessage);
+                }
             }
 
         }
@@ -348,7 +370,7 @@ public class MainActivity extends AppCompatActivity {
     public String getTimeDisplayValue(){
          final TextView timerDisplay = findViewById(R.id.timer);
 
-        long elapsedSeconds = (System.nanoTime() - startTime) / 1000000000;
+        long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
 
         long hour;
         long minute;
@@ -378,6 +400,7 @@ public class MainActivity extends AppCompatActivity {
         if (startTime != 0) {
             runThread = true;
             new Thread(countdownRunnable).start();
+            statistics.loadStats();
         }
     }
 
@@ -385,5 +408,6 @@ public class MainActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         runThread = false;
+        statistics.saveStats();
     }
 }

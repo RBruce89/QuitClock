@@ -1,10 +1,53 @@
 <resources>
     <string name="app_name">QuitClock</string>
 
-    <string-array name="locations">
-        <item>Home</item>
-        <item>Work</item>
-        <item>Bar</item>
-        <item>Vacation</item>
-    </string-array>
+    <plurals name="cigarette">
+        <item quantity="one">cigarette</item>
+        <item quantity="other">cigarettes</item>
+    </plurals>
+
+    <plurals name="hour">
+        <item quantity="one">hour</item>
+        <item quantity="other">hours</item>
+    </plurals>
+
+    <plurals name="day">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+
+    <plurals name="minute">
+        <item quantity="one">minute</item>
+        <item quantity="other">minutes</item>
+    </plurals>
+
+    <plurals name="time">
+        <item quantity="one">time</item>
+        <item quantity="other">times</item>
+    </plurals>
+
+    <string name="day_smoked">Over the last 24 hours, you\'ve smoked %1$d %2$s.\u0020</string>
+
+    <string name="day_intervals">
+        That\'s an average of %1$.2f %2$s between each cigarette.\n\n</string>
+
+    <string name="month_smoked">In the last %1$d %2$s, you\'ve smoked %3$d %4$s,\u0020</string>
+
+    <string name="month_intervals">or one every %1$.2f %2$s.\u0020</string>
+
+    <string name="month_yearly_smoked">That\'s %1$d %2$s a year.\u0020</string>
+
+    <string name="month_location">Most of them from %1$s.\u0020</string>
+
+    <string name="month_timer_drops">You set the timer back %1$d %2$s,\u0020</string>
+
+    <string name="month_early_smokes">
+        and lit %1$d %2$s before the timer was done,\u0020</string>
+
+    <string name="month_extra_minutes">
+        but you usually had an extra %1$d %2$s left on the timer.\n\n</string>
+
+    <string name="total_smoked">Since you downloaded this app, you\'ve smoked %1$d %2$s,\u0020</string>
+
+    <string name="total_smoked_daily">or an average of %1$d %2$s a day.</string>
 </resources>
