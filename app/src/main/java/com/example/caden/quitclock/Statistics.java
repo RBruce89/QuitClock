@@ -235,11 +235,9 @@ public class Statistics{
     {
         int cigsFromLast24Hours = 0;
         long currentHours = TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis());
-        System.out.println("Current hours = " + currentHours);
 
         for (long timeStamp : mCigarettesSmoked) {
             long timeStampHours = TimeUnit.MILLISECONDS.toHours(timeStamp);
-            System.out.println("Time stamp hours = " + timeStampHours);
             if (timeStampHours > (currentHours - 24)){
                 cigsFromLast24Hours += 1;
             }

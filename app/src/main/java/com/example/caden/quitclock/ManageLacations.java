@@ -45,14 +45,14 @@ public class ManageLacations {
             locationSpinner.setSelection(locationsArrayAdapter.getPosition(selectedLocation));
 
             AlertDialog.Builder locationBuilder = new AlertDialog.Builder(mainActivity);
-            locationBuilder.setTitle("Name your new location:");
+            locationBuilder.setTitle(R.string.add_location_title);
 
             final EditText locationInput = new EditText(mainActivity);
             locationInput.setFilters(new InputFilter[] {new InputFilter.LengthFilter(12)});
             locationInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
             locationBuilder.setView(locationInput);
 
-            locationBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            locationBuilder.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     String locationName = locationInput.getText().toString();
@@ -81,7 +81,7 @@ public class ManageLacations {
                     }
                 }
             });
-            locationBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            locationBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.cancel();

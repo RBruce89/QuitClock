@@ -87,9 +87,8 @@ public class MainActivity extends AppCompatActivity {
                         new Thread(countdownRunnable).start();
                     } else if (timerSeconds > elapsedSeconds) {
                         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(MainActivity.this);
-                        warningBuilder.setTitle(
-                                "Your time isn't up yet. Are you sure you want to light up?");
-                        warningBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        warningBuilder.setTitle(R.string.early_light_warning);
+                        warningBuilder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 saveStartTime(System.currentTimeMillis());
@@ -99,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                                 statistics.addExtraMinutes(0, startTime);
                             }
                         });
-                        warningBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        warningBuilder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.cancel();
@@ -128,16 +127,15 @@ public class MainActivity extends AppCompatActivity {
                     long newTimerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
                     if (newTimerSeconds < tempTimerSeconds) {
                         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(MainActivity.this);
-                        warningBuilder.setTitle(
-                                "Are you sure you want to reduce the timer for this location?");
-                        warningBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        warningBuilder.setTitle(R.string.reduce_timer_warning);
+                        warningBuilder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 manageLacations.setLocationTime();
                                 statistics.addTimerTurnDown(System.currentTimeMillis());
                             }
                         });
-                        warningBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        warningBuilder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.cancel();
