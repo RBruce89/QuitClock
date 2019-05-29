@@ -56,6 +56,7 @@ public class Statistics{
         mLocationTimes.get(location).add(timeStamp);
     }
 
+    //Loops through saved statistics and removes those older than 30 days (excluding smokes).
     public void removeOutdated()
     {
         long currentHours = TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis());
@@ -97,6 +98,7 @@ public class Statistics{
         }
     }
 
+    //Initializes statistics from shared preferences.
     public void loadStats()
     {
         SharedPreferences statsPrefs = PreferenceManager.getDefaultSharedPreferences(
@@ -135,6 +137,7 @@ public class Statistics{
         }
     }
 
+    //Saves current statistics to shared preferences.
     public void saveStats()
     {
         SharedPreferences statsPrefs = PreferenceManager.getDefaultSharedPreferences(
@@ -164,9 +167,9 @@ public class Statistics{
         statsPrefsEditor.commit();
     }
 
+    //Finds and displays Statistic values.
     public void display(TextView statsTextView)
     {
-
         int smokedDay = getCigsFromLast24Hours();
         double intervalsDay = (double) 24 / smokedDay;
         int smokedMonth = getCigsFromLast30Days();
@@ -189,47 +192,45 @@ public class Statistics{
         int smokedTotal = (mCigarettesSmoked == null) ? 0 : mCigarettesSmoked.size();
         int smokedDailyTotal = smokedTotal / (int) getDaysSinceFirstCig();
 
-        System.out.println(getDaysSinceFirstCig());
-
-        //set string
         Resources res = mainActivity.getResources();
 
         String pluralItem = res.getQuantityString(R.plurals.cigarette, smokedDay);
-        String display = res.getString(R.string.day_smoked, smokedDay, pluralItem);
+        String statsText = res.getString(R.string.day_smoked, smokedDay, pluralItem);
 
         pluralItem = res.getQuantityString(R.plurals.hour, (int) intervalsDay);
-        display += res.getString(R.string.day_intervals, intervalsDay, pluralItem);
+        statsText += res.getString(R.string.day_intervals, intervalsDay, pluralItem);
 
         pluralItem = res.getQuantityString(R.plurals.cigarette, smokedMonth);
         String dayPlural = res.getQuantityString(R.plurals.day, monthDays);
-        display += res.getString(R.string.month_smoked, monthDays, dayPlural, smokedMonth, pluralItem);
+        statsText += res.getString(R.string.month_smoked, monthDays, dayPlural, smokedMonth, pluralItem);
 
         pluralItem = res.getQuantityString(R.plurals.hour, (int) intervalsMonth);
-        display += res.getString(R.string.month_intervals, intervalsMonth, pluralItem);
+        statsText += res.getString(R.string.month_intervals, intervalsMonth, pluralItem);
 
         pluralItem = res.getQuantityString(R.plurals.cigarette, yearlySmokedMonth);
-        display += res.getString(R.string.month_yearly_smoked, yearlySmokedMonth, pluralItem);
+        statsText += res.getString(R.string.month_yearly_smoked, yearlySmokedMonth, pluralItem);
 
-        display += res.getString(R.string.month_location, locationsMonth);
+        statsText += res.getString(R.string.month_location, locationsMonth);
 
         pluralItem = res.getQuantityString(R.plurals.time, timerDropsMonth);
-        display += res.getString(R.string.month_timer_drops, timerDropsMonth, pluralItem);
+        statsText += res.getString(R.string.month_timer_drops, timerDropsMonth, pluralItem);
 
         pluralItem = res.getQuantityString(R.plurals.cigarette, earlySmokesMonth);
-        display += res.getString(R.string.month_early_smokes, earlySmokesMonth, pluralItem);
+        statsText += res.getString(R.string.month_early_smokes, earlySmokesMonth, pluralItem);
 
         pluralItem = res.getQuantityString(R.plurals.minute, extraMinutesMonth);
-        display += res.getString(R.string.month_extra_minutes, extraMinutesMonth, pluralItem);
+        statsText += res.getString(R.string.month_extra_minutes, extraMinutesMonth, pluralItem);
 
         pluralItem = res.getQuantityString(R.plurals.cigarette, smokedTotal);
-        display += res.getString(R.string.total_smoked, smokedTotal, pluralItem);
+        statsText += res.getString(R.string.total_smoked, smokedTotal, pluralItem);
 
         pluralItem = res.getQuantityString(R.plurals.cigarette, smokedDailyTotal);
-        display += res.getString(R.string.total_smoked_daily, smokedDailyTotal, pluralItem);
+        statsText += res.getString(R.string.total_smoked_daily, smokedDailyTotal, pluralItem);
 
-        statsTextView.setText(display);
+        statsTextView.setText(statsText);
     }
 
+    //Returns number of cigarettes smoked in the last 24 hours.
     private int getCigsFromLast24Hours()
     {
         int cigsFromLast24Hours = 0;
@@ -247,6 +248,7 @@ public class Statistics{
         return cigsFromLast24Hours;
     }
 
+    //Returns number of cigarettes smoked in the last 30 days.
     private int getCigsFromLast30Days()
     {
         int cigsFromLast30Days = 0;
@@ -262,6 +264,7 @@ public class Statistics{
         return cigsFromLast30Days;
     }
 
+    //Returns the average amount of extra minutes between smokes.
     private int getAverageExtraMinutes()
     {
         int totalExtraMinutes = 0;
@@ -278,6 +281,7 @@ public class Statistics{
         return averageExtraMinutes;
     }
 
+    //Returns days passed since first cigarette smoked.
     private long getDaysSinceFirstCig()
     {
         long firstCigTime = System.currentTimeMillis();
@@ -289,11 +293,10 @@ public class Statistics{
             }
         }
 
-
-
         return (currentDays - TimeUnit.MILLISECONDS.toDays(firstCigTime)) + 1;
     }
 
+    //Returns the location where the most cigarettes were smoked.
     private String getMostFrequentLocation()
     {
         String mostFrequentLocation = "";
@@ -309,5 +312,4 @@ public class Statistics{
 
         return mostFrequentLocation;
     }
-
 }

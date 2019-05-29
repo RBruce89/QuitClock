@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 public class StatisticsActivity extends MainActivity {
 
+    //Initializes and displays statistics.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

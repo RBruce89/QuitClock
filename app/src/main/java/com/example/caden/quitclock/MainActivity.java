@@ -8,37 +8,22 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputFilter;
-import android.text.InputType;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
-import com.google.gson.Gson;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
     Statistics statistics = new Statistics(this);
+    ManageLacations manageLacations = new ManageLacations(this);
 
     private long startTime;
     private SharedPreferences startTimePref;
-
-    private ArrayList<String> locationList = new ArrayList<>();
-    private SharedPreferences locationListPrefs;
-    private String selectedLocation;
-    private SharedPreferences selectedLocationPref;
-
-    private SharedPreferences locationSettingPrefs;
 
     private Boolean pickersEnabled = true;
 
@@ -58,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    //Initialises shared preferences and listeners.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,94 +57,16 @@ public class MainActivity extends AppCompatActivity {
         startTimePref = getSharedPreferences("startTime", MODE_PRIVATE);
         startTime = startTimePref.getLong("startTime", 0);
 
-        selectedLocationPref = getSharedPreferences("selectedLocation", MODE_PRIVATE);
-        selectedLocation = selectedLocationPref.getString("selectedLocation", "Home");
-
-        locationListPrefs = getSharedPreferences("locationList", MODE_PRIVATE);
-
-        HashSet<String> defaultSet = new HashSet<>();
-        locationList = new ArrayList<>(locationListPrefs.getStringSet("locationList", defaultSet));
-        if (locationList.size() < 3) {
-            locationList.add("Home");
-            locationList.add("Work");
-            locationList.add("Vacation");
-        }
-        locationList.add(0, "Add Location");
-
-        final ArrayAdapter<String> locationsArrayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, locationList);
-        locationsArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        locationSpinner.setAdapter(locationsArrayAdapter);
-        locationSpinner.setSelection(locationsArrayAdapter.getPosition(selectedLocation));
+        manageLacations.loadLocationPrefs();
+        manageLacations.updateLocationSettings();
 
         setUpPickers();
 
-        updateLocationSettings();
-
+        //Handles spinner item changes.
         locationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                final Spinner locationsSpinner = findViewById(R.id.spn_locations);
-
-                if(position == 0) {
-                    locationSpinner.setSelection(locationsArrayAdapter.getPosition(selectedLocation));
-
-                    AlertDialog.Builder locationBuilder = new AlertDialog.Builder(MainActivity.this);
-                    locationBuilder.setTitle("Name your new location:");
-
-                    final EditText locationInput = new EditText(MainActivity.this);
-                    locationInput.setFilters(new InputFilter[] {new InputFilter.LengthFilter(12)});
-
-                    locationInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-                    locationBuilder.setView(locationInput);
-
-                    locationBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String locationName = locationInput.getText().toString();
-                            if (!locationName.equals("")) {
-                                tempTimerSeconds = 0;
-
-                                locationList.remove(0);
-                                locationList.add(locationName);
-
-                                HashSet<String> locationListSet = new HashSet<>(locationList);
-
-                                SharedPreferences.Editor listPrefsEditor = locationListPrefs.edit();
-                                listPrefsEditor.putStringSet("locationList", locationListSet);
-                                listPrefsEditor.apply();
-
-                                locationList.add(0, "Add Location");
-
-                                Spinner locationSpinner = findViewById(R.id.spn_locations);
-                                ArrayAdapter<String> locationsArrayAdapter = new ArrayAdapter<String>(
-                                        MainActivity.this, android.R.layout.simple_spinner_item, locationList);
-                                locationsArrayAdapter.setDropDownViewResource(
-                                        android.R.layout.simple_spinner_dropdown_item);
-                                locationSpinner.setAdapter(locationsArrayAdapter);
-                                locationSpinner.setSelection(locationsArrayAdapter.getPosition(locationName));
-
-                                selectedLocation = locationName;
-                                SharedPreferences.Editor selectedLocationPrefsEditor = selectedLocationPref.edit();
-                                selectedLocationPrefsEditor.putString("selectedProjectName", selectedLocation);
-                                selectedLocationPrefsEditor.apply();
-                            }
-                        }
-                    });
-                    locationBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    locationBuilder.show();
-                }
-
-                selectedLocation = locationsSpinner.getSelectedItem().toString();
-                SharedPreferences.Editor selectedLocationPrefsEditor = selectedLocationPref.edit();
-                selectedLocationPrefsEditor.putString("selectedLocation", selectedLocation);
-                selectedLocationPrefsEditor.apply();
-                updateLocationSettings();
+                manageLacations.spinnerSelection(position);
             }
 
             @Override
@@ -166,19 +74,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Determines the conditions cigarettes were lit under, and reports to statistics.
         lightUpButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 if (!pickersEnabled) {
                     long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
                     if (startTime == 0) {
-                        startTime = System.currentTimeMillis();
+                        saveStartTime(System.currentTimeMillis());
                         statistics.addCigaretteSmoked(startTime);
-                        statistics.addLocationTime(selectedLocation, startTime);
+                        statistics.addLocationTime(manageLacations.getSelectedLocation(), startTime);
                         runThread = true;
                         new Thread(countdownRunnable).start();
-                        SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
-                        startTimePrefsEditor.putLong("startTime", startTime);
-                        startTimePrefsEditor.apply();
                     } else if (timerSeconds > elapsedSeconds) {
                         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(MainActivity.this);
                         warningBuilder.setTitle(
@@ -186,14 +92,11 @@ public class MainActivity extends AppCompatActivity {
                         warningBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                startTime = System.currentTimeMillis();
+                                saveStartTime(System.currentTimeMillis());
                                 statistics.addPrematureSmoke(startTime);
                                 statistics.addCigaretteSmoked(startTime);
-                                statistics.addLocationTime(selectedLocation, startTime);
+                                statistics.addLocationTime(manageLacations.getSelectedLocation(), startTime);
                                 statistics.addExtraMinutes(0, startTime);
-                                SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
-                                startTimePrefsEditor.putLong("startTime", startTime);
-                                startTimePrefsEditor.apply();
                             }
                         });
                         warningBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -204,20 +107,18 @@ public class MainActivity extends AppCompatActivity {
                         });
                         warningBuilder.show();
                     } else {
-                        startTime = System.currentTimeMillis();
+                        saveStartTime(System.currentTimeMillis());
                         statistics.addCigaretteSmoked(startTime);
-                        statistics.addLocationTime(selectedLocation, startTime);
+                        statistics.addLocationTime(manageLacations.getSelectedLocation(), startTime);
                         long extraSeconds = elapsedSeconds - timerSeconds;
                         int extraMinutes = (int) TimeUnit.SECONDS.toMinutes(extraSeconds);
                         statistics.addExtraMinutes(extraMinutes, startTime);
-                        SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
-                        startTimePrefsEditor.putLong("startTime", startTime);
-                        startTimePrefsEditor.apply();
                     }
                 }
             }
         });
 
+        //Locks or unlocks number pickers to change timer intervals.
         lockButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 final Button lockButton  = findViewById(R.id.btn_lock_number_pickers);
@@ -232,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                         warningBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                setLocationTime();
+                                manageLacations.setLocationTime();
                                 statistics.addTimerTurnDown(System.currentTimeMillis());
                             }
                         });
@@ -244,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                         });
                         warningBuilder.show();
                     } else {
-                        setLocationTime();
+                        manageLacations.setLocationTime();
                     }
                 } else {
                     tempTimerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
@@ -256,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Launches statistics screen.
         statisticsButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, StatisticsActivity.class);
@@ -264,32 +166,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void setLocationTime() {
-        Button lockButton  = findViewById(R.id.btn_lock_number_pickers);
-        NumberPicker hourPicker = findViewById(R.id.nbp_hour);
-        NumberPicker minutePicker = findViewById(R.id.nbp_minute);
-
-        pickersEnabled = false;
-        hourPicker.setEnabled(false);
-        minutePicker.setEnabled(false);
-        lockButton.setBackgroundResource(R.drawable.round_lock_black_36);
-        timerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
-
-        JSONObject timerJSONObject = new JSONObject();
-        try {
-            timerJSONObject.put("hours", hourPicker.getValue());
-            timerJSONObject.put("minutes", minutePicker.getValue());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        SharedPreferences.Editor locationSettingsPrefsEditor = locationSettingPrefs.edit();
-        Gson locationSettingsGson = new Gson();
-        String timerJson = locationSettingsGson.toJson(timerJSONObject);
-        locationSettingsPrefsEditor.putString(selectedLocation, timerJson);
-        locationSettingsPrefsEditor.apply();
+    //Changes start time and saves corresponding shared preference.
+    public void saveStartTime(long time){
+        startTime = time;
+        SharedPreferences.Editor startTimePrefsEditor = startTimePref.edit();
+        startTimePrefsEditor.putLong("startTime", startTime);
+        startTimePrefsEditor.apply();
     }
 
+    //Initializes number picker settings.
     public void setUpPickers() {
         final NumberPicker hourPicker = findViewById(R.id.nbp_hour);
         hourPicker.setMaxValue(23);
@@ -311,45 +196,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void updateLocationSettings() {
-        final Button lockButton = findViewById(R.id.btn_lock_number_pickers);
-        final NumberPicker hourPicker = findViewById(R.id.nbp_hour);
-        final NumberPicker minutePicker = findViewById(R.id.nbp_minute);
-
-        locationSettingPrefs = getSharedPreferences(selectedLocation, MODE_PRIVATE);
-        if (locationSettingPrefs.contains(selectedLocation)) {
-            Gson locationSettingsGson = new Gson();
-            String locationSettingsJson = locationSettingPrefs.getString(selectedLocation, "");
-            JSONObject timerValuesJson = locationSettingsGson.fromJson(locationSettingsJson, JSONObject.class);
-
-            try {
-                String hourString = String.format(timerValuesJson.get("hours").toString(), "%.0f");
-                String minuteString = String.format(timerValuesJson.get("minutes").toString(), "%.0f");
-
-                int hours = (int) Double.parseDouble(hourString);
-                int minutes = (int) Double.parseDouble(minuteString);
-
-                hourPicker.setEnabled(false);
-                hourPicker.setValue(hours);
-                minutePicker.setEnabled(false);
-                minutePicker.setValue(minutes);
-                timerSeconds = (hourPicker.getValue() * 3600) + (minutePicker.getValue() * 60);
-                lockButton.setBackgroundResource(R.drawable.round_lock_black_36);
-                pickersEnabled = false;
-
-            } catch (JSONException e) {
-                System.out.println("json exception on updateLocationSettings catch");
-            }
-        } else {
-            hourPicker.setEnabled(true);
-            hourPicker.setValue(0);
-            minutePicker.setEnabled(true);
-            minutePicker.setValue(0);
-            lockButton.setBackgroundResource(R.drawable.round_lock_open_black_36);
-            pickersEnabled = true;
-        }
-    }
-
+    //Sets instructions for background thread to update timer.
     private Runnable countdownRunnable = new Runnable() {
         @Override
         public void run() {
@@ -363,10 +210,10 @@ public class MainActivity extends AppCompatActivity {
                     countdownHandler.sendMessage(timerMessage);
                 }
             }
-
         }
     };
 
+    //Returns a formatted string to display as the timer.
     public String getTimeDisplayValue(){
          final TextView timerDisplay = findViewById(R.id.timer);
 
@@ -394,6 +241,19 @@ public class MainActivity extends AppCompatActivity {
                 Locale.US, "%01d:%02d:%02d", hour, minute, second)));
     }
 
+    public void setPickersEnabled(Boolean value){
+        pickersEnabled = value;
+    }
+
+    public void setTimerSeconds(long seconds){
+        timerSeconds = seconds;
+    }
+
+    public void setTempTimerSeconds(long seconds){
+        tempTimerSeconds = seconds;
+    }
+
+    //Starts timer thread and initializes statistics.
     @Override
     public void onResume() {
         super.onResume();
@@ -404,6 +264,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Ends thread and saves statistics.
     @Override
     public void onPause() {
         super.onPause();
