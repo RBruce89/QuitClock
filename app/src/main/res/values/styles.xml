@@ -12,10 +12,18 @@
         <item name="android:dropDownListViewStyle">@style/spinnerDropDownList</item>
     </style>
 
-    <color name="colorLocked">#B0BEC5</color>
+    <color name="colorLocked">#D32F2F</color>
     <color name="colorUnlocked">#000000</color>
-    <color name="colorRed">#D50000</color>
-    <color name="colorGreen">#00E676</color>
+
+    <color name="colorRedButton">#9E9E9E</color>
+    <color name="colorLightRed">#FFEBEE</color>
+    <color name="colorRedAccent">#D50000</color>
+    <color name="colorGreenButton">#78909C</color>
+    <color name="colorLightGreen">#E8F5E9</color>
+    <color name="colorGreenAccent">#00C853</color>
+
+    <color name="colorBlack">#000000</color>
+    <color name="colorWhite">#FFFFFF</color>
 
     <style name="spinnerItemStyle">
         <item name="android:paddingTop">0dp</item>
@@ -24,6 +32,7 @@
         <item name="android:paddingLeft">0dp</item>
         <item name="android:gravity">center_horizontal</item>
         <item name="android:textSize">32sp</item>
+        <item name="android:fontFamily">serif</item>
     </style>
 
     <style name="spinnerDropDownItemStyle">
@@ -31,7 +40,8 @@
         <item name="android:paddingBottom">0dp</item>
         <item name="android:paddingRight">0dp</item>
         <item name="android:paddingLeft">12dp</item>
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">serif</item>
     </style>
 
     <style name="spinnerDropDownList">

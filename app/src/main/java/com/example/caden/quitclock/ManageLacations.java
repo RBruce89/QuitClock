@@ -48,7 +48,7 @@ public class ManageLacations {
             locationBuilder.setTitle(R.string.add_location_title);
 
             final EditText locationInput = new EditText(mainActivity);
-            locationInput.setFilters(new InputFilter[] {new InputFilter.LengthFilter(12)});
+            locationInput.setFilters(new InputFilter[] {new InputFilter.LengthFilter(10)});
             locationInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
             locationBuilder.setView(locationInput);
 

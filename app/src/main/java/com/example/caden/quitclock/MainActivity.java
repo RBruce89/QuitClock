@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -214,6 +215,9 @@ public class MainActivity extends AppCompatActivity {
     //Returns a formatted string to display as the timer.
     public String getTimeDisplayValue(){
          final TextView timerDisplay = findViewById(R.id.timer);
+         final Button lightUpButton = findViewById(R.id.btn_light_up);
+         final TextView divider = findViewById(R.id.divider);
+         final ConstraintLayout background = findViewById(R.id.lyt_background);
 
         long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
 
@@ -222,13 +226,25 @@ public class MainActivity extends AppCompatActivity {
         long second;
 
         if (timerSeconds > elapsedSeconds){
-            timerDisplay.setTextColor(getResources().getColor(R.color.colorRed));
+            if (timerDisplay.getCurrentTextColor() != getResources().getColor(R.color.colorRedAccent)) {
+                timerDisplay.setTextColor(getResources().getColor(R.color.colorRedAccent));
+                divider.setBackgroundColor(getResources().getColor(R.color.colorRedAccent));
+                lightUpButton.setBackgroundColor(getResources().getColor(R.color.colorRedButton));
+                lightUpButton.setTextColor(getResources().getColor(R.color.colorBlack));
+                background.setBackgroundColor(getResources().getColor(R.color.colorLightRed));
+            }
             long remainingSeconds = timerSeconds - elapsedSeconds;
             hour = TimeUnit.SECONDS.toHours(remainingSeconds);
             minute = TimeUnit.SECONDS.toMinutes(remainingSeconds) % 60;
             second = remainingSeconds % 60;
         } else {
-            timerDisplay.setTextColor(getResources().getColor(R.color.colorGreen));
+            if (timerDisplay.getCurrentTextColor() != getResources().getColor(R.color.colorGreenAccent)) {
+                timerDisplay.setTextColor(getResources().getColor(R.color.colorGreenAccent));
+                divider.setBackgroundColor(getResources().getColor(R.color.colorGreenAccent));
+                lightUpButton.setBackgroundColor(getResources().getColor(R.color.colorGreenButton));
+                lightUpButton.setTextColor(getResources().getColor(R.color.colorWhite));
+                background.setBackgroundColor(getResources().getColor(R.color.colorLightGreen));
+            }
             long extraSeconds = elapsedSeconds - timerSeconds;
             hour = TimeUnit.SECONDS.toHours(extraSeconds);
             minute = TimeUnit.SECONDS.toMinutes(extraSeconds) % 60;
