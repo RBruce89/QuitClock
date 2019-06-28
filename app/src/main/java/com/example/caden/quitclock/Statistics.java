@@ -62,36 +62,40 @@ public class Statistics{
         long currentHours = TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis());
 
         if (mTimerTurnDowns != null) {
-            for (Long timerDown : mTimerTurnDowns) {
-                long timerDownHours = TimeUnit.MILLISECONDS.toHours(timerDown);
+            for (int i = 0; i < mTimerTurnDowns.size(); i++) {
+                long timerDownHours = TimeUnit.MILLISECONDS.toHours(mTimerTurnDowns.get(i));
                 if (timerDownHours < (currentHours - 720)) {
-                    mTimerTurnDowns.remove(timerDown);
+                    mTimerTurnDowns.remove(i);
+                    i--;
                 }
             }
         }
         if (mPrematureSmokes != null) {
-            for (Long prematureSmoke : mPrematureSmokes) {
-                long prematureSmokeHours = TimeUnit.MILLISECONDS.toHours(prematureSmoke);
+            for (int i = 0; i < mPrematureSmokes.size(); i++) {
+                long prematureSmokeHours = TimeUnit.MILLISECONDS.toHours(mPrematureSmokes.get(i));
                 if (prematureSmokeHours < (currentHours - 720)) {
-                    mPrematureSmokes.remove(prematureSmoke);
+                    mPrematureSmokes.remove(i);
+                    i--;
                 }
             }
         }
         if (mExtraMinutes != null) {
-            for (Long[] extraMinutesTime : mExtraMinutes) {
-                long extraMinutesTimeHours = TimeUnit.MILLISECONDS.toHours(extraMinutesTime[1]);
+            for (int i = 0; i < mExtraMinutes.size(); i++) {
+                Long extraMinutesEntry[] = mExtraMinutes.get(i);
+                long extraMinutesTimeHours = TimeUnit.MILLISECONDS.toHours(extraMinutesEntry[1]);
                 if (extraMinutesTimeHours < (currentHours - 720)) {
-                    mPrematureSmokes.remove(extraMinutesTime);
+                    mExtraMinutes.remove(i);
+                    i--;
                 }
             }
         }
         if (mLocationTimes != null) {
             for (HashMap.Entry<String, ArrayList<Long>> locationEntry : mLocationTimes.entrySet()) {
                 ArrayList<Long> times = locationEntry.getValue();
-                for (Long time : times) {
-                    long timeHours = TimeUnit.MILLISECONDS.toHours(time);
+                for (int i = 0; i < times.size(); i++) {
+                    long timeHours = TimeUnit.MILLISECONDS.toHours(times.get(i));
                     if (timeHours < (currentHours - 720)) {
-                        times.remove(time);
+                        times.remove(i);
                     }
                 }
             }
@@ -177,7 +181,7 @@ public class Statistics{
         int yearlySmokedMonth;
         int monthDays;
         if (getDaysSinceFirstCig() > 29) {
-            intervalsMonth = (double) 720 / smokedMonth;
+            intervalsMonth = (double) (720 / smokedMonth);
             yearlySmokedMonth = (int) (smokedMonth * 12.16);
             monthDays = 30;
         } else {
