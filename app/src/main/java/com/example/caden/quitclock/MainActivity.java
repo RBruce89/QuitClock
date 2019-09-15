@@ -96,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
                                 statistics.addPrematureSmoke(startTime);
                                 statistics.addCigaretteSmoked(startTime);
                                 statistics.addLocationTime(manageLacations.getSelectedLocation(), startTime);
-                                statistics.addExtraMinutes(0, startTime);
                             }
                         });
                         warningBuilder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -112,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
                         statistics.addLocationTime(manageLacations.getSelectedLocation(), startTime);
                         long extraSeconds = elapsedSeconds - timerSeconds;
                         int extraMinutes = (int) TimeUnit.SECONDS.toMinutes(extraSeconds);
-                        statistics.addExtraMinutes(extraMinutes, startTime);
                     }
                 }
             }

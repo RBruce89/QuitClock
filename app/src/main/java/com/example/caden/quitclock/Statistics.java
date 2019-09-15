@@ -16,7 +16,6 @@ public class Statistics{
     private ArrayList<Long> mCigarettesSmoked = new ArrayList<>();
     private ArrayList<Long> mTimerTurnDowns = new ArrayList<>();
     private ArrayList<Long> mPrematureSmokes = new ArrayList<>();
-    private ArrayList<Long[]> mExtraMinutes = new ArrayList<>();
     private HashMap<String, ArrayList<Long>> mLocationTimes = new HashMap<>();
 
     private MainActivity mainActivity;
@@ -40,12 +39,6 @@ public class Statistics{
     public void addPrematureSmoke(long timeStamp)
     {
         mPrematureSmokes.add(timeStamp);
-    }
-
-    public void addExtraMinutes(long extraMinutes, long timeStamp)
-    {
-        Long[] entry = {extraMinutes, timeStamp};
-        mExtraMinutes.add(entry);
     }
 
     public void addLocationTime(String location, long timeStamp)
@@ -75,16 +68,6 @@ public class Statistics{
                 long prematureSmokeHours = TimeUnit.MILLISECONDS.toHours(mPrematureSmokes.get(i));
                 if (prematureSmokeHours < (currentHours - 720)) {
                     mPrematureSmokes.remove(i);
-                    i--;
-                }
-            }
-        }
-        if (mExtraMinutes != null) {
-            for (int i = 0; i < mExtraMinutes.size(); i++) {
-                Long extraMinutesEntry[] = mExtraMinutes.get(i);
-                long extraMinutesTimeHours = TimeUnit.MILLISECONDS.toHours(extraMinutesEntry[1]);
-                if (extraMinutesTimeHours < (currentHours - 720)) {
-                    mExtraMinutes.remove(i);
                     i--;
                 }
             }
@@ -128,12 +111,6 @@ public class Statistics{
             mPrematureSmokes = statsGson.fromJson(json, type);
         }
 
-        if (statsPrefs.contains("extraMinutes")) {
-            String json = statsPrefs.getString("extraMinutes", "");
-            Type type = new TypeToken<ArrayList<Long[]>>(){}.getType();
-            mExtraMinutes = statsGson.fromJson(json, type);
-        }
-
         if (statsPrefs.contains("locationTimes")) {
             String json = statsPrefs.getString("locationTimes", "");
             Type type = new TypeToken<HashMap<String, ArrayList<Long>>>(){}.getType();
@@ -160,10 +137,6 @@ public class Statistics{
             String prematureSmokes = statsGson.toJson(mPrematureSmokes);
             statsPrefsEditor.putString("prematureSmokes", prematureSmokes);
         }
-        if (mExtraMinutes != null) {
-            String extraMinutes = statsGson.toJson(mExtraMinutes);
-            statsPrefsEditor.putString("extraMinutes", extraMinutes);
-        }
         if (mLocationTimes != null) {
             String locationTimes = statsGson.toJson(mLocationTimes);
             statsPrefsEditor.putString("locationTimes", locationTimes);
@@ -175,61 +148,52 @@ public class Statistics{
     public void display(TextView statsTextView)
     {
         int smokedDay = getCigsFromLast24Hours();
-        double intervalsDay = (double) 24 / smokedDay;
+        int prematureSmokesDay = getPrematureSmokesDay();
+        String topLocationDay = getMostFrequentLocationDay();
+
         int smokedMonth = getCigsFromLast30Days();
-        double intervalsMonth;
-        int yearlySmokedMonth;
         int monthDays;
+        int dailySmokedMonth;
+        int yearlySmokedMonth;
         if (getDaysSinceFirstCig() > 29) {
-            intervalsMonth = (double) (720 / smokedMonth);
-            yearlySmokedMonth = (int) (smokedMonth * 12.16);
             monthDays = 30;
+            dailySmokedMonth = smokedMonth / 30;
+            yearlySmokedMonth = dailySmokedMonth * 365;
         } else {
-            intervalsMonth = (double) (getDaysSinceFirstCig() * 24) / smokedMonth;
-            yearlySmokedMonth = (int) (smokedMonth * (365 / getDaysSinceFirstCig()));
             monthDays = (int) getDaysSinceFirstCig();
+            dailySmokedMonth = (int) (smokedMonth / getDaysSinceFirstCig());
+            yearlySmokedMonth = dailySmokedMonth * 365;
         }
-        String locationsMonth = getMostFrequentLocation();
-        int timerDropsMonth = (mTimerTurnDowns == null) ? 0 : mTimerTurnDowns.size();  //not reporting
-        int earlySmokesMonth = (mPrematureSmokes == null) ? 0 : mPrematureSmokes.size();
-        int extraMinutesMonth = getAverageExtraMinutes();
+        int timerDownsMonth = (mTimerTurnDowns == null) ? 0 : mTimerTurnDowns.size();
+        int earlyLightsMonth = (mPrematureSmokes == null) ? 0 : mPrematureSmokes.size();
+        String topLocationMonth = getMostFrequentLocationMonth();
+
         int smokedTotal = (mCigarettesSmoked == null) ? 0 : mCigarettesSmoked.size();
-        int smokedDailyTotal = smokedTotal / (int) getDaysSinceFirstCig();
+        int averageDailyTotal = smokedTotal / (int) getDaysSinceFirstCig();
+        int averageYearlyTotal = averageDailyTotal * 365;
 
         Resources res = mainActivity.getResources();
 
-        String pluralItem = res.getQuantityString(R.plurals.cigarette, smokedDay);
-        String statsText = res.getString(R.string.day_smoked, smokedDay, pluralItem);
+        String statsText = res.getString(R.string.last_day);
+        statsText += res.getString(R.string.cigs, smokedDay);
+        statsText += res.getString(R.string.early_lights, prematureSmokesDay);
+        statsText += res.getString(R.string.top_location, topLocationDay);
+        statsText += "\n";
 
-        pluralItem = res.getQuantityString(R.plurals.hour, (int) intervalsDay);
-        statsText += res.getString(R.string.day_intervals, intervalsDay, pluralItem);
-
-        pluralItem = res.getQuantityString(R.plurals.cigarette, smokedMonth);
         String dayPlural = res.getQuantityString(R.plurals.day, monthDays);
-        statsText += res.getString(R.string.month_smoked, monthDays, dayPlural, smokedMonth, pluralItem);
+        statsText += res.getString(R.string.last_month, monthDays, dayPlural);
+        statsText += res.getString(R.string.cigs, smokedMonth);
+        statsText += res.getString(R.string.daily_average, dailySmokedMonth);
+        statsText += res.getString(R.string.yearly_average, yearlySmokedMonth);
+        statsText += res.getString(R.string.timer_downs, timerDownsMonth);
+        statsText += res.getString(R.string.early_lights, earlyLightsMonth);
+        statsText += res.getString(R.string.top_location, topLocationMonth);
+        statsText += "\n";
 
-        pluralItem = res.getQuantityString(R.plurals.hour, (int) intervalsMonth);
-        statsText += res.getString(R.string.month_intervals, intervalsMonth, pluralItem);
-
-        pluralItem = res.getQuantityString(R.plurals.cigarette, yearlySmokedMonth);
-        statsText += res.getString(R.string.month_yearly_smoked, yearlySmokedMonth, pluralItem);
-
-        statsText += res.getString(R.string.month_location, locationsMonth);
-
-        pluralItem = res.getQuantityString(R.plurals.time, timerDropsMonth);
-        statsText += res.getString(R.string.month_timer_drops, timerDropsMonth, pluralItem);
-
-        pluralItem = res.getQuantityString(R.plurals.cigarette, earlySmokesMonth);
-        statsText += res.getString(R.string.month_early_smokes, earlySmokesMonth, pluralItem);
-
-        pluralItem = res.getQuantityString(R.plurals.minute, extraMinutesMonth);
-        statsText += res.getString(R.string.month_extra_minutes, extraMinutesMonth, pluralItem);
-
-        pluralItem = res.getQuantityString(R.plurals.cigarette, smokedTotal);
-        statsText += res.getString(R.string.total_smoked, smokedTotal, pluralItem);
-
-        pluralItem = res.getQuantityString(R.plurals.cigarette, smokedDailyTotal);
-        statsText += res.getString(R.string.total_smoked_daily, smokedDailyTotal, pluralItem);
+        statsText += res.getString(R.string.lifetime);
+        statsText += res.getString(R.string.cigs, smokedTotal);
+        statsText += res.getString(R.string.daily_average, averageDailyTotal);
+        statsText += res.getString(R.string.yearly_average, averageYearlyTotal);
 
         statsTextView.setText(statsText);
     }
@@ -266,23 +230,6 @@ public class Statistics{
         return cigsFromLast30Days;
     }
 
-    //Returns the average amount of extra minutes between smokes.
-    private int getAverageExtraMinutes()
-    {
-        int totalExtraMinutes = 0;
-
-        for (Long[] extraMinutesEntry : mExtraMinutes){
-            totalExtraMinutes += extraMinutesEntry[0];
-        }
-
-        int averageExtraMinutes = 0;
-        if (mExtraMinutes.size() > 0) {
-            averageExtraMinutes = (int) (totalExtraMinutes / mExtraMinutes.size());
-        }
-
-        return averageExtraMinutes;
-    }
-
     //Returns days passed since first cigarette smoked.
     private long getDaysSinceFirstCig()
     {
@@ -298,8 +245,51 @@ public class Statistics{
         return (currentDays - TimeUnit.MILLISECONDS.toDays(firstCigTime)) + 1;
     }
 
-    //Returns the location where the most cigarettes were smoked.
-    private String getMostFrequentLocation()
+    //Returns number of premature smokes in the last 24 hours.
+    private int getPrematureSmokesDay()
+    {
+        int prematureSmokesFromLast24Hours = 0;
+        long currentHours = TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis());
+
+        for (long timeStamp : mPrematureSmokes) {
+            long timeStampHours = TimeUnit.MILLISECONDS.toHours(timeStamp);
+            if (timeStampHours > (currentHours - 24)){
+                prematureSmokesFromLast24Hours += 1;
+            }
+        }
+
+        return prematureSmokesFromLast24Hours;
+    }
+
+    //Returns the location where the most cigarettes were smoked in the last day.
+    private String getMostFrequentLocationDay()
+    {
+        long currentHours = TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis());
+        String mostFrequentLocation = "";
+        int locationFrequency = 0;
+
+        for (HashMap.Entry<String, ArrayList<Long>> locationEntry : mLocationTimes.entrySet()){
+            ArrayList<Long> times = locationEntry.getValue();
+
+            int locationCigsDay = 0;
+            for (long timeStamp : times) {
+                long timeStampHours = TimeUnit.MILLISECONDS.toHours(timeStamp);
+                if (timeStampHours > (currentHours - 24)){
+                    locationCigsDay += 1;
+                }
+            }
+
+            if (locationCigsDay > locationFrequency){
+                locationFrequency = locationCigsDay;
+                mostFrequentLocation = locationEntry.getKey();
+            }
+        }
+
+        return mostFrequentLocation;
+    }
+
+    //Returns the location where the most cigarettes were smoked in the last month.
+    private String getMostFrequentLocationMonth()
     {
         String mostFrequentLocation = "";
         int locationFrequency = 0;
