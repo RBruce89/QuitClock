@@ -153,15 +153,15 @@ public class Statistics{
 
         int smokedMonth = getCigsFromLast30Days();
         int monthDays;
-        int dailySmokedMonth;
-        int yearlySmokedMonth;
+        double dailySmokedMonth;
+        double yearlySmokedMonth;
         if (getDaysSinceFirstCig() > 29) {
             monthDays = 30;
             dailySmokedMonth = smokedMonth / 30;
             yearlySmokedMonth = dailySmokedMonth * 365;
         } else {
             monthDays = (int) getDaysSinceFirstCig();
-            dailySmokedMonth = (int) (smokedMonth / getDaysSinceFirstCig());
+            dailySmokedMonth = (smokedMonth / getDaysSinceFirstCig());
             yearlySmokedMonth = dailySmokedMonth * 365;
         }
         int timerDownsMonth = (mTimerTurnDowns == null) ? 0 : mTimerTurnDowns.size();
@@ -169,8 +169,8 @@ public class Statistics{
         String topLocationMonth = getMostFrequentLocationMonth();
 
         int smokedTotal = (mCigarettesSmoked == null) ? 0 : mCigarettesSmoked.size();
-        int averageDailyTotal = smokedTotal / (int) getDaysSinceFirstCig();
-        int averageYearlyTotal = averageDailyTotal * 365;
+        double averageDailyTotal = smokedTotal / (int) getDaysSinceFirstCig();
+        double averageYearlyTotal = averageDailyTotal * 365;
 
         Resources res = mainActivity.getResources();
 
@@ -265,7 +265,7 @@ public class Statistics{
     private String getMostFrequentLocationDay()
     {
         long currentHours = TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis());
-        String mostFrequentLocation = "";
+        String mostFrequentLocation = "None";
         int locationFrequency = 0;
 
         for (HashMap.Entry<String, ArrayList<Long>> locationEntry : mLocationTimes.entrySet()){
@@ -291,7 +291,7 @@ public class Statistics{
     //Returns the location where the most cigarettes were smoked in the last month.
     private String getMostFrequentLocationMonth()
     {
-        String mostFrequentLocation = "";
+        String mostFrequentLocation = "None";
         int locationFrequency = 0;
 
         for (HashMap.Entry<String, ArrayList<Long>> locationEntry : mLocationTimes.entrySet()){

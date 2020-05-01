@@ -219,17 +219,23 @@ public class MainActivity extends AppCompatActivity {
 
         long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
 
-        long hour;
-        long minute;
-        long second;
+        long day = 0;
+        long hour = 0;
+        long minute = 0;
+        long second = 0;
 
         if (timerSeconds > elapsedSeconds){
             if (timerDisplay.getCurrentTextColor() != getResources().getColor(R.color.colorRedAccent)) {
-                timerDisplay.setTextColor(getResources().getColor(R.color.colorRedAccent));
-                divider.setBackgroundColor(getResources().getColor(R.color.colorRedAccent));
-                lightUpButton.setBackgroundColor(getResources().getColor(R.color.colorRedButton));
-                lightUpButton.setTextColor(getResources().getColor(R.color.colorBlack));
-                background.setBackgroundColor(getResources().getColor(R.color.colorLightRed));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        timerDisplay.setTextColor(getResources().getColor(R.color.colorRedAccent));
+                        divider.setBackgroundColor(getResources().getColor(R.color.colorRedAccent));
+                        lightUpButton.setBackgroundColor(getResources().getColor(R.color.colorRedButton));
+                        lightUpButton.setTextColor(getResources().getColor(R.color.colorBlack));
+                        background.setBackgroundColor(getResources().getColor(R.color.colorLightRed));
+                    }
+                });
             }
             long remainingSeconds = timerSeconds - elapsedSeconds;
             hour = TimeUnit.SECONDS.toHours(remainingSeconds);
@@ -237,20 +243,31 @@ public class MainActivity extends AppCompatActivity {
             second = remainingSeconds % 60;
         } else {
             if (timerDisplay.getCurrentTextColor() != getResources().getColor(R.color.colorGreenAccent)) {
-                timerDisplay.setTextColor(getResources().getColor(R.color.colorGreenAccent));
-                divider.setBackgroundColor(getResources().getColor(R.color.colorGreenAccent));
-                lightUpButton.setBackgroundColor(getResources().getColor(R.color.colorGreenButton));
-                lightUpButton.setTextColor(getResources().getColor(R.color.colorWhite));
-                background.setBackgroundColor(getResources().getColor(R.color.colorLightGreen));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        timerDisplay.setTextColor(getResources().getColor(R.color.colorGreenAccent));
+                        divider.setBackgroundColor(getResources().getColor(R.color.colorGreenAccent));
+                        lightUpButton.setBackgroundColor(getResources().getColor(R.color.colorGreenButton));
+                        lightUpButton.setTextColor(getResources().getColor(R.color.colorWhite));
+                        background.setBackgroundColor(getResources().getColor(R.color.colorLightGreen));
+                    }
+                });
             }
             long extraSeconds = elapsedSeconds - timerSeconds;
-            hour = TimeUnit.SECONDS.toHours(extraSeconds);
+            day = TimeUnit.SECONDS.toDays(extraSeconds);
+            hour = TimeUnit.SECONDS.toHours(extraSeconds)% 24;
             minute = TimeUnit.SECONDS.toMinutes(extraSeconds) % 60;
             second = extraSeconds % 60;
         }
 
-        return (String.valueOf(String.format(
-                Locale.US, "%01d:%02d:%02d", hour, minute, second)));
+        if (day < 1) {
+            return (String.valueOf(String.format(
+                    Locale.US, "%01d:%02d:%02d", hour, minute, second)));
+        } else {
+            return (String.valueOf(String.format(
+                    Locale.US, "%01d:%02d:%02d", day, hour, minute)));
+        }
     }
 
     public void setPickersEnabled(Boolean value){

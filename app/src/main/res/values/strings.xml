@@ -16,9 +16,9 @@
 
     <string name="top_location">Most common location - %1$s\n</string>
 
-    <string name="daily_average">Average daily - %1$d\n</string>
+    <string name="daily_average">Average daily - %1$.1f\n</string>
 
-    <string name="yearly_average">Average yearly - %1$d\n</string>
+    <string name="yearly_average">Average yearly - %1$.0f\n</string>
 
     <string name="timer_downs">Timer set backs - %1$d\n</string>
 
